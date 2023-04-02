@@ -18,5 +18,8 @@ def set_settings(endpoint, payload):
 def get_styles(endpoint):
     return requests.get(url=f'{endpoint}/sdapi/v1/prompt-styles')
 
+def get_upscalers(endpoint):
+    return requests.get(url=f'{endpoint}/sdapi/v1/upscalers')
+
 def get_png_info(endpoint, payload):
-    return requests.post(url=f'{endpoint}/sdapi/v1/png-info')
+    return requests.post(url=f'{endpoint}/sdapi/v1/png-info', json=payload)
