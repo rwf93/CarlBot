@@ -4,7 +4,7 @@ import time
 from discord.ext import commands
 import discord
 
-from utils.watchdog import setup_watchdog
+from utils.watchdog import setup_watchdog, kill_watchdog
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,3 +30,5 @@ def watch_cogs(src):
 cog_watcher = setup_watchdog(watch_cogs, "cogs/")
 
 bot.run(os.getenv("BOT_TOKEN"))
+
+kill_watchdog(cog_watcher)

@@ -71,6 +71,6 @@ class AI(commands.Cog):
             embed.set_image(url="attachment://output.png")
             
             await ctx.send(file=file, embed=embed)
-    
+
 def setup(bot):
     bot.add_cog(AI(bot))

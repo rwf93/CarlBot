@@ -27,3 +27,7 @@ def setup_watchdog(watcher, path):
     observer.start()
 
     return observer
+
+def kill_watchdog(observer):
+    observer.stop()
+    observer.join()
