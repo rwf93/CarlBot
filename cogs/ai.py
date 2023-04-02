@@ -1,8 +1,7 @@
-import sdapi
+import utils.sdapi as sdapi
 import os
 import io
 import base64
-import json
 
 import discord
 from discord.ext import commands
@@ -50,7 +49,7 @@ class AI(commands.Cog):
     @commands.hybrid_command(name='sdmodels')
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def sd_models(self, ctx):
-        r = sdapi.getmodels(os.getenv('SD_ENDPOINT')).json()
+        r = sdapi.get_models(os.getenv('SD_ENDPOINT')).json()
         reply = "Available models: ```"
         for i in r:
             reply = reply + f'{i["title"]}\n'
@@ -61,7 +60,7 @@ class AI(commands.Cog):
     @commands.hybrid_command(name='sdsamplers')
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def sd_samplers(self, ctx):
-        r = sdapi.getsamplers(os.getenv('SD_ENDPOINT')).json()
+        r = sdapi.get_samplers(os.getenv('SD_ENDPOINT')).json()
         reply = "Available samplers: ```"
         for i in r:
             reply = reply + f'{i["name"]}\n'
