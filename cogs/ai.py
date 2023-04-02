@@ -3,6 +3,7 @@ import utils.sdapi as sdapi
 import os
 import io
 import base64
+import json
 
 import discord
 from discord.ext import commands
@@ -36,7 +37,8 @@ class AI(commands.Cog):
     @option("negative_prompt", description="Negative prompt (what you DONT want)", default="")
     @option("sampler", choices=samplers, default="Euler")
     @option("styles", choices=styles, default="")
-    async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, styles: str, steps: int, cfg_scale: int, sampler: str, width: int, height: int):
+    @option("seed", default=-1)
+    async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, styles: str, steps: int, cfg_scale: int, sampler: str, width: int, height: int, seed: int):
         await ctx.respond("Please wait while we generate your ~~porn~~ image")
         
         prompt = {
@@ -51,19 +53,23 @@ class AI(commands.Cog):
 
             "sampler_index":    sampler,
             
-            "styles":           [ styles ]
+            "styles":           [ styles ],
+            # sneed
+            "seed":             seed
         }
 
         r = sdapi.txt2img(os.getenv("SD_ENDPOINT"), prompt).json()
 
         for i in r["images"]:
             file = discord.File(io.BytesIO(base64.b64decode(i.split(",",1)[0])), filename="output.png")
-            
-            embed = discord.Embed()
-            embed.set_author(name=ctx.author)
-            embed.set_thumbnail(url=ctx.author.avatar)
-            embed.set_image(url="attachment://output.png")
 
+            embed = discord.Embed(
+                description="Seed: " + str(json.loads(r["info"])["seed"]),
+                color=discord.Color.random()
+            )
+            embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
+            embed.set_image(url="attachment://output.png")
+            
             await ctx.send(file=file, embed=embed)
 
 def setup(bot):
