@@ -21,6 +21,8 @@ class AI(commands.Cog):
         width:           int = commands.flag(default=512)
         height:          int = commands.flag(default=512)
 
+        sampler_index:   str = commands.flag(default="Euler", description="What sampler to use (use /sdsamplers)")
+
     @commands.hybrid_command(name='sdprompt')
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def sd_prompt(self, ctx, *, flags: PromptFlags):
@@ -35,6 +37,8 @@ class AI(commands.Cog):
             
             "width": flags.width,
             "height": flags.height,
+
+            "sampler_index": flags.sampler_index
         }
         
         r = sdapi.txt2img(os.getenv('SD_ENDPOINT'), prompt).json()
@@ -45,8 +49,25 @@ class AI(commands.Cog):
 
     @commands.hybrid_command(name='sdmodels')
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def sd_models(self, ctx, *, flags: PromptFlags):
-        
+    async def sd_models(self, ctx):
+        r = sdapi.getmodels(os.getenv('SD_ENDPOINT')).json()
+        reply = "Available models: ```"
+        for i in r:
+            reply = reply + f'{i["title"]}\n'
+        reply = reply + "```"
 
+        await ctx.reply(reply)
+
+    @commands.hybrid_command(name='sdsamplers')
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def sd_samplers(self, ctx):
+        r = sdapi.getsamplers(os.getenv('SD_ENDPOINT')).json()
+        reply = "Available samplers: ```"
+        for i in r:
+            reply = reply + f'{i["name"]}\n'
+        reply = reply + "```"
+
+        await ctx.reply(reply)
+    
 async def setup(client):
     await client.add_cog(AI(client))
