@@ -4,31 +4,27 @@ import time
 from discord.ext import commands
 import discord
 
-from utils.watchdog import setup_watchdog, kill_watchdog
+import asyncio
+from cogwatch import Watcher
 
 from dotenv import load_dotenv
 load_dotenv()
 
-bot = discord.Bot()
+intents = discord.Intents.all()
+intents.message_content = True
 
-@bot.event
-async def on_ready():
-    print(f"We have logged in as {bot.user}")
-    
-for filename in os.listdir('./cogs'):
-  if filename.endswith('.py'):
-    print(f'Registering cog: {filename[:-3]}')
-    bot.load_extension(f'cogs.{filename[:-3]}')
+class CarlBot(discord.Bot):
+    def __init__(self):
+        super().__init__(intents=intents)
 
-# WATCH_DOGS HIT VDIEO GAME????????
-def watch_cogs(src): 
-   filename = os.path.basename(src)
-   if filename.endswith('.py'):
-      print(f'Reloading cog: {filename[:-3]}')
-      bot.reload_extension(f'cogs.{filename[:-3]}')
+    async def on_ready(self):
+        print("Ready.")
+        
+async def main():
+    bot = CarlBot()
+    watcher = Watcher(bot, "cogs/", preload=True)
+    await watcher.start()
+    await bot.start(os.getenv('BOT_TOKEN'))
 
-cog_watcher = setup_watchdog(watch_cogs, "cogs/")
-
-bot.run(os.getenv("BOT_TOKEN"))
-
-kill_watchdog(cog_watcher)
+if __name__ == '__main__':
+    asyncio.run(main())
