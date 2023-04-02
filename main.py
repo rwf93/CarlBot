@@ -1,12 +1,13 @@
-import discord
 import os
+import time
+
 from discord.ext import commands
+import discord
+
+from utils.watchdog import setup_watchdog
 
 from dotenv import load_dotenv
 load_dotenv()
-
-intents = discord.Intents.all()
-intents.message_content = True
 
 bot = discord.Bot()
 
@@ -18,5 +19,12 @@ for filename in os.listdir('./cogs'):
   if filename.endswith('.py'):
     print(f'Registering cog: {filename[:-3]}')
     bot.load_extension(f'cogs.{filename[:-3]}')
+    
+def watch_cogs(src): 
+   filename = os.path.basename(src)
+   if filename.endswith('.py'):
+      print(f'Reloading cog: {filename[:-3]}')
+      bot.reload_extension(f'cogs.{filename[:-3]}')
 
+cog_watcher = setup_watchdog(watch_cogs, "cogs/")
 bot.run(os.getenv("BOT_TOKEN"))

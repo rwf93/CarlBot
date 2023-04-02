@@ -5,9 +5,9 @@ class Misc(commands.Cog):
         self.bot = bot
         self._last_member = None
 
-    @commands.slash_command()
+    @commands.slash_command(name = "ping")
     async def ping(self, ctx):
-        await ctx.respond("Pong!")
+        await ctx.respond("Ping!")
 
 def setup(bot):
     bot.add_cog(Misc(bot))

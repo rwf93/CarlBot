@@ -65,12 +65,12 @@ class AI(commands.Cog):
 
             embed = discord.Embed(
                 description="Seed: " + str(json.loads(r["info"])["seed"]),
-                color=discord.Color.random()
+                color=discord.Color.random(seed=json.loads(r["info"])["seed"])
             )
             embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
             embed.set_image(url="attachment://output.png")
             
             await ctx.send(file=file, embed=embed)
-
+    
 def setup(bot):
     bot.add_cog(AI(bot))
