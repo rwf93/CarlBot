@@ -9,13 +9,17 @@ from discord.ext import commands
 from discord import option
 
 samplers = []
+styles = []
 models = []
 
 for sampler in sdapi.get_samplers(os.getenv('SD_ENDPOINT')).json():
     samplers.append(sampler["name"])
 
 for model in sdapi.get_models(os.getenv('SD_ENDPOINT')).json():
-    models.append(sampler["title"])
+    models.append(model["model_name"])
+
+for style in sdapi.get_styles(os.getenv('SD_ENDPOINT')).json():
+    styles.append(style["name"])
 
 class AI(commands.Cog):
     def __init__(self, bot):
@@ -23,16 +27,16 @@ class AI(commands.Cog):
         self._last_member = None
 
     @commands.slash_command(name="sdprompt")
-    
+    @commands.cooldown(1, 10, commands.BucketType.user)
     @option("prompt", description="Prompt (what you want)")
     @option("width", default=512, max=1024)
     @option("height", default=512, max=1024)
-    # DEFAULTS HAVE TO BE FUCKING LAST FOR SOME FUCKING REASON
     @option("steps", description="How many steps the model go through", default=26, max=128)
     @option("cfg_scale", description="Classifier Free Guidance", default=12, max=36)
     @option("negative_prompt", description="Negative prompt (what you DONT want)", default="")
     @option("sampler", choices=samplers, default="Euler")
-    async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: int, sampler: str, width: int, height: int):
+    @option("styles", choices=styles, default="")
+    async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, styles: str, steps: int, cfg_scale: int, sampler: str, width: int, height: int):
         await ctx.respond("Please wait while we generate your ~~porn~~ image")
         
         prompt = {
@@ -45,14 +49,22 @@ class AI(commands.Cog):
             "width":            width,
             "height":           height,
 
-            "sampler_index":    sampler
+            "sampler_index":    sampler,
+            
+            "styles":           [ styles ]
         }
 
         r = sdapi.txt2img(os.getenv("SD_ENDPOINT"), prompt).json()
 
         for i in r["images"]:
             file = discord.File(io.BytesIO(base64.b64decode(i.split(",",1)[0])), filename="output.png")
-            await ctx.respond(file=file)
+            
+            embed = discord.Embed()
+            embed.set_author(name=ctx.author)
+            embed.set_thumbnail(url=ctx.author.avatar)
+            embed.set_image(url="attachment://output.png")
+
+            await ctx.send(file=file, embed=embed)
 
 def setup(bot):
     bot.add_cog(AI(bot))

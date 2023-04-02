@@ -13,4 +13,10 @@ def get_settings(endpoint):
     return requests.get(url=f'{endpoint}/sdapi/v1/options')
 
 def set_settings(endpoint, payload):
-    return requests.get(url=f'{endpoint}/sdapi/v1/options', json=payload)
+    return requests.post(url=f'{endpoint}/sdapi/v1/options', json=payload)
+
+def get_styles(endpoint):
+    return requests.get(url=f'{endpoint}/sdapi/v1/prompt-styles')
+
+def get_png_info(endpoint, payload):
+    return requests.post(url=f'{endpoint}/sdapi/v1/png-info')
