@@ -14,7 +14,7 @@ bot = discord.Bot()
 @bot.event
 async def on_ready():
     print(f"We have logged in as {bot.user}")
-
+    
 for filename in os.listdir('./cogs'):
   if filename.endswith('.py'):
     print(f'Registering cog: {filename[:-3]}')

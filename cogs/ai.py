@@ -44,9 +44,7 @@ class AI(commands.Cog):
     @option("sampler",          choices=samplers, default="Euler")
     @option("styles",           choices=styles, default="")
     @option("seed",             default=-1)
-    @option("upscaler",         choices=upscalers, default = "")
-    @option("upscaler_scale",   default=2, max=4)
-    async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: int, width: int, height: int, sampler: str, styles: str, seed: int, upscaler: str, upscaler_scale: int):
+    async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: int, width: int, height: int, sampler: str, styles: str, seed: int):
         await ctx.respond("Please wait while we generate your ~~porn~~ image")
         
         prompt = {
@@ -64,9 +62,6 @@ class AI(commands.Cog):
             "styles":           [ styles ],
             # sneed
             "seed":             seed,
-
-            "hr_upscaler":      upscaler,
-            "hr_scale":         upscaler_scale
         }
 
         r = sdapi.txt2img(os.getenv("SD_ENDPOINT"), prompt).json()
@@ -82,6 +77,12 @@ class AI(commands.Cog):
             embed.set_image(url="attachment://output.png")
             
             await ctx.send(file=file, embed=embed)
+
+    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send("You're on cooldown")
+        else:
+            raise error
 
 def setup(bot):
     bot.add_cog(AI(bot))
