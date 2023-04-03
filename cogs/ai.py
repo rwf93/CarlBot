@@ -9,7 +9,7 @@ import discord
 from discord.ext import commands
 from discord import option
 
-SD_ENDPOINT=os.getenv("SD_ENDPOINT")
+SD_ENDPOINT = os.getenv("SD_ENDPOINT")
 
 samplers = []
 styles = []
@@ -20,7 +20,7 @@ for sampler in sdapi.get_samplers(SD_ENDPOINT).json():
     samplers.append(sampler["name"])
 
 for model in sdapi.get_models(SD_ENDPOINT).json():
-    models.append(model["model_name"])
+    models.append(model["title"])
 
 for style in sdapi.get_styles(SD_ENDPOINT).json():
     styles.append(style["name"])
@@ -34,7 +34,7 @@ class AI(commands.Cog):
         self._last_member = None
 
     @commands.slash_command(name="sdprompt")
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.guild)
     @option("prompt",           description="Prompt (what you want)")
     @option("negative_prompt",  description="Negative prompt (what you DONT want)", default="")
     @option("steps",            description="How many steps the model go through", default=26, max=128)
@@ -64,25 +64,50 @@ class AI(commands.Cog):
             "seed":             seed,
         }
 
-        r = sdapi.txt2img(os.getenv("SD_ENDPOINT"), prompt).json()
+        r = sdapi.txt2img(os.getenv("SD_ENDPOINT"), prompt)
+        if r.status_code != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - sdapi.txt2img returned {r.status_code}")
+        
+        rjson = r.json()
 
-        for i in r["images"]:
+        for i in rjson["images"]:
             file = discord.File(io.BytesIO(base64.b64decode(i.split(",",1)[0])), filename="output.png")
 
             embed = discord.Embed(
-                description="Seed: " + str(json.loads(r["info"])["seed"]),
-                color=discord.Color.random(seed=json.loads(r["info"])["seed"])
+                description="Seed: " + str(json.loads(rjson["info"])["seed"]),
+                color=discord.Color.random(seed=json.loads(rjson["info"])["seed"])
             )
             embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
             embed.set_image(url="attachment://output.png")
             
             await ctx.send(file=file, embed=embed)
 
+        
+    @commands.slash_command(name="sdmodel")
+    @commands.max_concurrency(1, commands.BucketType.guild)
+    @option("model", choices=models, description="Model you want")
+    async def sd_model(self, ctx: discord.ApplicationCommand, model: str):
+        payload = {
+            "sd_model_checkpoint": model
+        }
+    
+        await ctx.respond("Setting model")
+
+        r = sdapi.set_settings(SD_ENDPOINT, payload)
+        if r.status_code != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - sdapi.set_model returned {r.status_code}")
+
+        await ctx.respond("Set model")
+
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send("You're on cooldown")
-        else:
-            raise error
+            await ctx.reply(ctx.author, "You're on cooldown", ephemeral=True)
+        
+        if isinstance(error, commands.MaxConcurrencyReached):
+            await ctx.reply(ctx.author, "Max concurrency reached on command", ephemeral=True)
+    
+        if isinstance(error, commands.CommandInvokeError):
+            await ctx.reply(ctx.author, error.args[0])
 
 def setup(bot):
     bot.add_cog(AI(bot))
