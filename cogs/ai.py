@@ -18,7 +18,6 @@ class AI(commands.Cog):
 
     @staticmethod
     def sampler_autocomplete(self):
-        print("Doing autocomplete")
         samplers = []
         for sampler in sdapi.get_samplers(SD_ENDPOINT).json():
             samplers.append(sampler["name"])
@@ -36,7 +35,7 @@ class AI(commands.Cog):
         styles = []
         for style in sdapi.get_styles(SD_ENDPOINT).json():
             styles.append(style["name"])
-        return style
+        return styles
 
     @commands.slash_command(name="sdprompt")
     @commands.cooldown(1, 10, commands.BucketType.guild)
