@@ -4,6 +4,7 @@ import os
 import io
 import base64
 import json
+import typing
 
 import discord
 from discord.ext import commands
@@ -37,7 +38,7 @@ class AI(commands.Cog):
         return styles
 
     @commands.slash_command(name="sdprompt")
-    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     @option("prompt",           description="Prompt (what you want)")
     @option("negative_prompt",  description="Negative prompt (what you DONT want)", default="")
     @option("steps",            description="How many steps the model go through", default=26, max=128)
@@ -48,6 +49,7 @@ class AI(commands.Cog):
     @option("styles",           autocomplete=style_autocomplete, default="")
     @option("seed",             default=-1)
     async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: int, width: int, height: int, sampler: str, styles: str, seed: int):
+        # omg so unprofeshunul 
         await ctx.respond("Please wait while we generate your ~~porn~~ image")
         
         prompt = {
