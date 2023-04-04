@@ -38,7 +38,7 @@ class AI(commands.Cog):
     @option("prompt",           description="Prompt (what you want)")
     @option("negative_prompt",  description="Negative prompt (what you DONT want)", default="")
     @option("steps",            description="How many steps the model go through", default=26, max=128)
-    @option("cfg_scale",        description="Classifier Free Guidance", default=12, max=36)
+    @option("cfg_scale",        description="Classifier Free Guidance, defines how much the model should follow the text", default=12, max=36)
     @option("width",            default=512, max=1024)
     @option("height",           default=512, max=1024)
     @option("sampler",          choices=samplers, default="Euler")
@@ -64,11 +64,11 @@ class AI(commands.Cog):
             "seed":             seed,
         }
 
-        r = sdapi.txt2img(os.getenv("SD_ENDPOINT"), prompt)
-        if r.status_code != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - sdapi.txt2img returned {r.status_code}")
+        r = await sdapi.txt2img_async(SD_ENDPOINT, prompt)
+        if r["status"] != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - sdapi.txt2img returned {r['status']}")
         
-        rjson = r.json()
+        rjson = r["json"]
 
         for i in rjson["images"]:
             file = discord.File(io.BytesIO(base64.b64decode(i.split(",",1)[0])), filename="output.png")
@@ -91,7 +91,7 @@ class AI(commands.Cog):
             "sd_model_checkpoint": model
         }
     
-        await ctx.respond("Setting model")
+        await ctx.respond("Setting model", ephemeral=True)
 
         r = sdapi.set_settings(SD_ENDPOINT, payload)
         if r.status_code != 200:
@@ -99,15 +99,15 @@ class AI(commands.Cog):
 
         await ctx.respond("Set model")
 
-    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
+    async def cog_command_error(self, ctx: discord.ApplicationContext, error: commands.CommandError):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.reply(ctx.author, "You're on cooldown", ephemeral=True)
+            await ctx.respond("You're on cooldown", ephemeral=True)
         
         if isinstance(error, commands.MaxConcurrencyReached):
-            await ctx.reply(ctx.author, "Max concurrency reached on command", ephemeral=True)
+            await ctx.respond("Max concurrency reached on command", ephemeral=True)
     
         if isinstance(error, commands.CommandInvokeError):
-            await ctx.reply(ctx.author, error.args[0])
+            await ctx.respond(error.original, ephemeral=True)
 
 def setup(bot):
     bot.add_cog(AI(bot))
