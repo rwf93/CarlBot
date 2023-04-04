@@ -11,27 +11,32 @@ from discord import option
 
 SD_ENDPOINT = os.getenv("SD_ENDPOINT")
 
-samplers = []
-styles = []
-models = []
-upscalers = []
-
-for sampler in sdapi.get_samplers(SD_ENDPOINT).json():
-    samplers.append(sampler["name"])
-
-for model in sdapi.get_models(SD_ENDPOINT).json():
-    models.append(model["title"])
-
-for style in sdapi.get_styles(SD_ENDPOINT).json():
-    styles.append(style["name"])
-
-for upscaler in sdapi.get_upscalers(SD_ENDPOINT).json():
-    upscalers.append(upscaler["model_name"])
-
 class AI(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
+
+    @staticmethod
+    def sampler_autocomplete(self):
+        print("Doing autocomplete")
+        samplers = []
+        for sampler in sdapi.get_samplers(SD_ENDPOINT).json():
+            samplers.append(sampler["name"])
+        return samplers
+    
+    @staticmethod
+    def model_autocomplete(self):
+        models = []
+        for model in sdapi.get_models(SD_ENDPOINT).json():
+            models.append(model["title"])
+        return models
+
+    @staticmethod
+    def style_autocomplete(self):
+        styles = []
+        for style in sdapi.get_styles(SD_ENDPOINT).json():
+            styles.append(style["name"])
+        return style
 
     @commands.slash_command(name="sdprompt")
     @commands.cooldown(1, 10, commands.BucketType.guild)
@@ -41,8 +46,8 @@ class AI(commands.Cog):
     @option("cfg_scale",        description="Classifier Free Guidance, defines how much the model should follow the text", default=12, max=36)
     @option("width",            default=512, max=1024)
     @option("height",           default=512, max=1024)
-    @option("sampler",          choices=samplers, default="Euler")
-    @option("styles",           choices=styles, default="")
+    @option("sampler",          autocomplete=sampler_autocomplete, default="Euler")
+    @option("styles",           autocomplete=style_autocomplete, default="")
     @option("seed",             default=-1)
     async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: int, width: int, height: int, sampler: str, styles: str, seed: int):
         await ctx.respond("Please wait while we generate your ~~porn~~ image")
@@ -85,7 +90,7 @@ class AI(commands.Cog):
         
     @commands.slash_command(name="sdmodel")
     @commands.max_concurrency(1, commands.BucketType.guild)
-    @option("model", choices=models, description="Model you want")
+    @option("model", autocomplete=model_autocomplete, description="Model you want")
     async def sd_model(self, ctx: discord.ApplicationCommand, model: str):
         payload = {
             "sd_model_checkpoint": model
