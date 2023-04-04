@@ -1,3 +1,4 @@
+import utils.predicate as predicate
 from discord.ext import commands
 
 class Misc(commands.Cog):
