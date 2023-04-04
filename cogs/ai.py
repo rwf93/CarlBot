@@ -14,7 +14,6 @@ SD_ENDPOINT = os.getenv("SD_ENDPOINT")
 class AI(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
 
     @staticmethod
     def sampler_autocomplete(self):
@@ -86,7 +85,6 @@ class AI(commands.Cog):
             
             await ctx.send(file=file, embed=embed)
 
-        
     @commands.slash_command(name="sdmodel")
     @commands.max_concurrency(1, commands.BucketType.guild)
     @option("model", autocomplete=model_autocomplete, description="Model you want")
@@ -99,7 +97,7 @@ class AI(commands.Cog):
 
         r = sdapi.set_settings(SD_ENDPOINT, payload)
         if r.status_code != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - sdapi.set_model returned {r.status_code}")
+            raise commands.CommandInvokeError(f"Something went wrong - sdapi.set_settings returned {r.status_code}")
 
         await ctx.respond("Set model")
 
