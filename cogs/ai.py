@@ -1,4 +1,5 @@
 import utils.sdapi as sdapi
+import utils.autocomplete as autocomplete
 
 import os
 import io
@@ -19,50 +20,29 @@ class AI(commands.Cog):
 
     @staticmethod
     def samplers_autocomplete(self, ctx):
-        # maps all samplers' names to a list
-        samplers = list(
-            filter(
-                # filters it for fuzzy serach
-                lambda x: x.lower().startswith(ctx.value.lower()),
-                # maps the json response into a list
-                map(
-                    lambda i: i['name'],
-                    self.sampler_json
-                )
-            )
-        )
+        samplers = autocomplete.basic_autocomplete(ctx, map(
+            lambda i: i['name'],
+            self.sampler_json
+        ))
 
         return samplers
     
     @staticmethod
     def models_autocomplete(self, ctx):
-        models = list(
-            filter(
-                # filters it for fuzzy serach
-                lambda x: x.lower().startswith(ctx.value.lower()),
-                # maps the json response into a list
-                map(
-                    lambda i: i['title'],
-                    self.models_json
-                )
-            )
-        )
+        models = autocomplete.basic_autocomplete(ctx, map(
+            lambda i: i['title'],
+            self.models_json
+        ))
 
         return models
 
     @staticmethod
     def styles_autocomplete(self, ctx):
-        styles = list(
-            filter(
-                # filters it for fuzzy serach
-                lambda x: x.lower().startswith(ctx.value.lower()),
-                # maps the json response into a list
-                map(
-                    lambda i: i['name'],
-                    self.styles_json
-                )
-            )
-        )
+        styles = autocomplete.basic_autocomplete(ctx, map(
+            lambda i: i['name'],
+            self.styles_json
+        ))
+
         return styles
     
     @tasks.loop(seconds=30)
