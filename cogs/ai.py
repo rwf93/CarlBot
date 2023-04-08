@@ -155,13 +155,11 @@ class AI(commands.Cog):
             "image":            b64_image
         }
 
-        #r = await sdapi.upscale_single(SD_ENDPOINT, payload)
-        #if r["status"] != 200:
-        #    raise commands.CommandInvokeError(f"Something went wrong - upscale_single returned {r['status']}")
+        r = await sdapi.upscale_single_async(SD_ENDPOINT, payload)
+        if r["status"] != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - upscale_single returned {r['status']}")
         
-        r = sdapi.upscale_single(SD_ENDPOINT, payload).json()
-        image_data = r["json"]["image"]
-        file = discord.File(file=io.BytesIO(base64.decode(image_data)), filename="output.png")
+        file = discord.File(io.BytesIO(base64.b64decode(r["json"]["image"])), filename="output.png")
 
         await ctx.respond(file=file)
 
