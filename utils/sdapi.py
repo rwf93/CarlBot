@@ -22,7 +22,16 @@ def get_styles(endpoint):
 def get_upscalers(endpoint):
     return requests.get(url=f'{endpoint}/sdapi/v1/upscalers')
 
+def upscale_single(endpoint, payload):
+    return requests.post(url=f'{endpoint}/sdapi/v1/extra-single-image', json=payload)
+
 async def txt2img_async(endpoint, payload):
     async with aiohttp.ClientSession() as session:
         async with session.post(url=f'{endpoint}/sdapi/v1/txt2img', json=payload) as resp:
             return {"json": await resp.json(), "status": resp.status}
+
+async def upscale_single_async(endpoint, payload):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url=f'{endpoint}/sdapi/v1/extra-single-image', json=payload) as resp:
+            return {"json": await resp.json(), "status": resp.status}
+        

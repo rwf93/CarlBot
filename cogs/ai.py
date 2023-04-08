@@ -6,7 +6,9 @@ import io
 import base64
 import json
 import typing
+import requests
 
+import discord.utils as discordutils
 import discord
 from discord.ext import commands, tasks
 from discord import option
@@ -33,7 +35,7 @@ class AI(commands.Cog):
             lambda i: i['title'],
             self.models_json
         ))
-
+        
         return models
 
     @staticmethod
@@ -45,12 +47,22 @@ class AI(commands.Cog):
 
         return styles
     
+    @staticmethod
+    def upscalers_autocomplete(self, ctx):
+        upscalers = autocomplete.basic_autocomplete(ctx, map(
+            lambda i: i['name'],
+            self.upscalers_json
+        ))
+
+        return upscalers
+
     @tasks.loop(seconds=30)
     async def invalidate_sdcache(self):
-        self.sampler_json = sdapi.get_samplers(SD_ENDPOINT).json()
-        self.models_json = sdapi.get_models(SD_ENDPOINT).json()
-        self.styles_json = sdapi.get_styles(SD_ENDPOINT).json()
-
+        self.sampler_json   = sdapi.get_samplers(SD_ENDPOINT).json()
+        self.models_json    = sdapi.get_models(SD_ENDPOINT).json()
+        self.styles_json    = sdapi.get_styles(SD_ENDPOINT).json()
+        self.upscalers_json = sdapi.get_upscalers(SD_ENDPOINT).json()
+    
     @commands.slash_command(name="sdprompt")
     @commands.cooldown(1, 10, commands.BucketType.user)
     @option("prompt",           description="Prompt (what you want)")
@@ -59,13 +71,13 @@ class AI(commands.Cog):
     @option("cfg_scale",        description="Classifier Free Guidance, defines how much the model should follow the text", default=12, max=36)
     @option("width",            default=512, max=1024)
     @option("height",           default=512, max=1024)
-    @option("sampler",          autocomplete=samplers_autocomplete, default="Euler")
+    @option("sampler",          autocomplete=samplers_autocomplete, default="Euler a")
     @option("styles",           autocomplete=styles_autocomplete, default="")
     @option("seed",             default=-1)
     async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: float, width: int, height: int, sampler: str, styles: str, seed: int):
         # omg so unprofeshunul 
         await ctx.respond("Please wait while we generate your ~~porn~~ image")
-        
+
         prompt = {
             "prompt":           prompt,
             "negative_prompt":  negative_prompt,
@@ -126,6 +138,32 @@ class AI(commands.Cog):
     
         if isinstance(error, commands.CommandInvokeError):
             await ctx.respond(error.original, ephemeral=True)
+    
+    @commands.slash_command(name="sdupscale")
+    @option("upscaler_one",       autocomplete=upscalers_autocomplete)
+    @option("upscaler_two",       autocomplete=upscalers_autocomplete, default="None")
+    @option("upscaler_amt",       default=2, max=4)
+    async def sd_upscale(self, ctx: discord.ApplicationContext, file: discord.Attachment, upscaler_one: str, upscaler_two: str, upscaler_amt: float):
+        await ctx.respond("Upscaling image")
+        
+        b64_image = 'data:image/png;base64,' + base64.b64encode(requests.get(file.url, stream=True).content).decode('utf-8')
+        
+        payload = {
+            "upscaler_1":       upscaler_one,
+            "upscaler_2":       upscaler_two,
+            "upscaling_resize": upscaler_amt,
+            "image":            b64_image
+        }
+
+        #r = await sdapi.upscale_single(SD_ENDPOINT, payload)
+        #if r["status"] != 200:
+        #    raise commands.CommandInvokeError(f"Something went wrong - upscale_single returned {r['status']}")
+        
+        r = sdapi.upscale_single(SD_ENDPOINT, payload).json()
+        image_data = r["json"]["image"]
+        file = discord.File(file=io.BytesIO(base64.decode(image_data)), filename="output.png")
+
+        await ctx.respond(file=file)
 
 def setup(bot):
     bot.add_cog(AI(bot))
