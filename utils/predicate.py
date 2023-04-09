@@ -8,7 +8,7 @@ def is_owner():
     return commands.check(predicate)
 
 # checks if author is owner OR has an manager role
-def is_admin():
+def is_manager():
     async def predicate(ctx: discord.ApplicationContext):
         if ctx.author.id == int(os.getenv("BOT_OWNER")): return True
         admin_roles = list(map(
