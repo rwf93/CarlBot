@@ -1,4 +1,5 @@
 import utils.sdapi as sdapi
+import utils.predicate as predicates
 import utils.autocomplete as autocomplete
 
 import os
@@ -116,6 +117,7 @@ class AI(commands.Cog):
     @commands.slash_command(name="sdmodel")
     @commands.max_concurrency(1, commands.BucketType.guild)
     @option("model", autocomplete=models_autocomplete, description="Model you want")
+    @predicates.is_admin()
     async def sd_model(self, ctx: discord.ApplicationCommand, model: str):
         payload = {
             "sd_model_checkpoint": model
@@ -143,6 +145,7 @@ class AI(commands.Cog):
     @option("upscaler_one",       autocomplete=upscalers_autocomplete)
     @option("upscaler_two",       autocomplete=upscalers_autocomplete, default="None")
     @option("upscaler_amt",       default=2, max=4)
+    @predicates.is_admin()
     async def sd_upscale(self, ctx: discord.ApplicationContext, file: discord.Attachment, upscaler_one: str, upscaler_two: str, upscaler_amt: float):
         await ctx.respond("Upscaling image")
         
