@@ -6,7 +6,7 @@ import os
 import io
 import base64
 import json
-import typing
+import re
 import requests
 
 import discord.utils as discordutils
@@ -98,20 +98,27 @@ class AI(commands.Cog):
 
         r = await sdapi.txt2img_async(SD_ENDPOINT, prompt)
         if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - sdapi.txt2img returned {r['status']}")
+            raise commands.CommandInvokeError(f"Something went wrong - sdapi.txt2img_async returned {r['status']}")
         
         rjson = r["json"]
+        info = json.loads(rjson["info"])
 
-        for i in rjson["images"]:
+        for idx, i in enumerate(rjson["images"]):
             file = discord.File(io.BytesIO(base64.b64decode(i.split(",",1)[0])), filename="output.png")
 
+            info_model = re.search("Model: ([^,]+)", info["infotexts"][idx]).group(1)
+            info_seed = info["seed"]
+
             embed = discord.Embed(
-                description="Seed: " + str(json.loads(rjson["info"])["seed"]),
-                color=discord.Color.random(seed=json.loads(rjson["info"])["seed"])
+                color=discord.Color.random(seed=info_seed)
             )
+            
             embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
             embed.set_image(url="attachment://output.png")
             
+            embed.add_field(name="Seed", value=f"{info_seed}")
+            embed.add_field(name="Model", value=info_model)            
+
             await ctx.send(file=file, embed=embed)
 
     @commands.slash_command(name="sdmodel")
@@ -125,9 +132,9 @@ class AI(commands.Cog):
     
         await ctx.respond("Setting model", ephemeral=True)
 
-        r = sdapi.set_settings(SD_ENDPOINT, payload)
-        if r.status_code != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - sdapi.set_settings returned {r.status_code}")
+        r = await sdapi.set_settings_async(SD_ENDPOINT, payload)
+        if r["status"] != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - sdapi.set_settings_async returned {r['status']}")
 
         await ctx.respond("Set model")
 
@@ -160,7 +167,7 @@ class AI(commands.Cog):
 
         r = await sdapi.upscale_single_async(SD_ENDPOINT, payload)
         if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - upscale_single returned {r['status']}")
+            raise commands.CommandInvokeError(f"Something went wrong - upscale_single_async returned {r['status']}")
         
         file = discord.File(io.BytesIO(base64.b64decode(r["json"]["image"])), filename="output.png")
 
