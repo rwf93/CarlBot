@@ -1,4 +1,6 @@
 import utils.sdapi as sdapi
+import utils.lmapi as lmapi
+
 import utils.predicate as predicates
 import utils.autocomplete as autocomplete
 
@@ -15,6 +17,7 @@ from discord.ext import commands, tasks
 from discord import option
 
 SD_ENDPOINT = os.getenv("SD_ENDPOINT")
+LM_ENDPOINT = os.getenv("LM_ENDPOINT")
 
 class AI(commands.Cog):
     def __init__(self, bot):
@@ -130,24 +133,14 @@ class AI(commands.Cog):
             "sd_model_checkpoint": model
         }
     
-        await ctx.respond("Setting model", ephemeral=True)
+        await ctx.respond("Setting model")
 
         r = await sdapi.set_settings_async(SD_ENDPOINT, payload)
         if r["status"] != 200:
             raise commands.CommandInvokeError(f"Something went wrong - sdapi.set_settings_async returned {r['status']}")
 
-        await ctx.respond("Set model")
+        await ctx.respond(f"Set model to: {model}")
 
-    async def cog_command_error(self, ctx: discord.ApplicationContext, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.respond("You're on cooldown", ephemeral=True)
-        
-        if isinstance(error, commands.MaxConcurrencyReached):
-            await ctx.respond("Max concurrency reached on command", ephemeral=True)
-    
-        if isinstance(error, commands.CommandInvokeError):
-            await ctx.respond(error.original, ephemeral=True)
-    
     @commands.slash_command(name="sdupscale")
     @option("upscaler_one",       autocomplete=upscalers_autocomplete)
     @option("upscaler_two",       autocomplete=upscalers_autocomplete, default="None")
@@ -167,11 +160,38 @@ class AI(commands.Cog):
 
         r = await sdapi.upscale_single_async(SD_ENDPOINT, payload)
         if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - upscale_single_async returned {r['status']}")
+            raise commands.CommandInvokeError(f"Something went wrong - sdapi.upscale_single_async returned {r['status']}")
         
         file = discord.File(io.BytesIO(base64.b64decode(r["json"]["image"])), filename="output.png")
 
         await ctx.respond(file=file)
+
+    @commands.slash_command(name="lmprompt")
+    @predicates.is_manager()
+    @option("prompt")
+    async def lm_prompt(self, ctx: discord.ApplicationCommand, prompt: str):
+        payload = {
+            'prompt': prompt,
+            'max_new_tokens': 250,
+        }
+
+        await ctx.respond("Generating LM output")
+        
+        r = lmapi.generate(LM_ENDPOINT, payload)
+        if r.status_code != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - lmapi.generate returned {r.status_code}")
+
+        await ctx.send(r.json()['results'][0]['text'])
+
+    async def cog_command_error(self, ctx: discord.ApplicationContext, error: commands.CommandError):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.respond("You're on cooldown", ephemeral=True)
+        
+        if isinstance(error, commands.MaxConcurrencyReached):
+            await ctx.respond("Max concurrency reached on command", ephemeral=True)
+    
+        if isinstance(error, commands.CommandInvokeError):
+            await ctx.respond(error.original, ephemeral=True)
 
 def setup(bot):
     bot.add_cog(AI(bot))
