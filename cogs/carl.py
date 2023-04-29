@@ -17,14 +17,14 @@ class CarlAI(commands.Cog):
     @predicates.is_manager()
     @option("prompt")
     async def carl_speak(self, ctx: discord.ApplicationContext, prompt: str):
-        prompt_start = "### Instruction:\r\nWrite the next message in this Discord chat room.\r\n"
-        prompt_end = f"### Reply to this user.\r\n[{self.bot.user.display_name}]: "
+        prompt_start = "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.\n### Instruction:\nWrite a reply to the last message.\n### Input:\n"
+        prompt_end = f"### Response:\n"
 
         # sorta bigbrain maybe?
-        history = "\r\n".join(
+        history = "\n".join(
             list(
                 map(
-                    lambda x: f'[{x.author.name}]: {x.content}',
+                    lambda x: f'{x.author.name} said: {x.content}',
                     filter(
                         lambda y: (y.author.id != self.bot.application_id) and y.type != discord.MessageType.application_command, 
                         await ctx.history(limit=25).flatten()
@@ -32,8 +32,8 @@ class CarlAI(commands.Cog):
                 )
             )
         )
-        real_prompt = f'[{ctx.author.name}]: {prompt}\r\n'
-        full_prompt = prompt_start + history + "\r\n" + real_prompt + prompt_end
+        real_prompt = f'[{ctx.author.name}]: {prompt}\n'
+        full_prompt = prompt_start + history + "\n" + real_prompt + prompt_end
 
         print(full_prompt)
 
