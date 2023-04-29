@@ -1,6 +1,6 @@
 # CarlBot
 
-CarlBot is a discord bot used for interacting with the Stable Diffusion Web UI.
+CarlBot is a discord bot used for interacting with the AUTOMATIC1111's [Stable Diffusion Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) and oobabooga's [text-generation-webui](https://github.com/oobabooga/text-generation-webui).
 
 ## Installation
 

@@ -11,7 +11,6 @@ import json
 import re
 import requests
 
-import discord.utils as discordutils
 import discord
 from discord.ext import commands, tasks
 from discord import option
@@ -171,7 +170,7 @@ class AI(commands.Cog):
     @option("prompt")
     async def lm_prompt(self, ctx: discord.ApplicationCommand, prompt: str):
         payload = {
-            'prompt': prompt,
+            "prompt": prompt,
             'max_new_tokens': 250,
         }
 
