@@ -26,7 +26,7 @@ class AI(commands.Cog):
     @staticmethod
     def samplers_autocomplete(self, ctx):
         samplers = autocomplete.basic_autocomplete(ctx, map(
-            lambda i: i['name'],
+            lambda i: i["name"],
             self.sampler_json
         ))
 
@@ -35,7 +35,7 @@ class AI(commands.Cog):
     @staticmethod
     def models_autocomplete(self, ctx):
         models = autocomplete.basic_autocomplete(ctx, map(
-            lambda i: i['title'],
+            lambda i: i["title"],
             self.models_json
         ))
         
@@ -44,7 +44,7 @@ class AI(commands.Cog):
     @staticmethod
     def styles_autocomplete(self, ctx):
         styles = autocomplete.basic_autocomplete(ctx, map(
-            lambda i: i['name'],
+            lambda i: i["name"],
             self.styles_json
         ))
 
@@ -53,7 +53,7 @@ class AI(commands.Cog):
     @staticmethod
     def upscalers_autocomplete(self, ctx):
         upscalers = autocomplete.basic_autocomplete(ctx, map(
-            lambda i: i['name'],
+            lambda i: i["name"],
             self.upscalers_json
         ))
 
@@ -148,7 +148,7 @@ class AI(commands.Cog):
     async def sd_upscale(self, ctx: discord.ApplicationContext, file: discord.Attachment, upscaler_one: str, upscaler_two: str, upscaler_amt: float):
         await ctx.respond("Upscaling image")
         
-        b64_image = 'data:image/png;base64,' + base64.b64encode(requests.get(file.url, stream=True).content).decode('utf-8')
+        b64_image = "data:image/png;base64," + base64.b64encode(requests.get(file.url, stream=True).content).decode("utf-8")
         
         payload = {
             "upscaler_1":       upscaler_one,
@@ -171,7 +171,7 @@ class AI(commands.Cog):
     async def lm_prompt(self, ctx: discord.ApplicationCommand, prompt: str):
         payload = {
             "prompt": prompt,
-            'max_new_tokens': 250,
+            "max_new_tokens": 250,
         }
 
         await ctx.respond("Generating LM output")
@@ -180,7 +180,7 @@ class AI(commands.Cog):
         if r.status_code != 200:
             raise commands.CommandInvokeError(f"Something went wrong - lmapi.generate returned {r.status_code}")
 
-        await ctx.send(r.json()['results'][0]['text'])
+        await ctx.send(r.json()["results"][0]["text"])
 
     async def cog_command_error(self, ctx: discord.ApplicationContext, error: commands.CommandError):
         if isinstance(error, commands.CommandOnCooldown):

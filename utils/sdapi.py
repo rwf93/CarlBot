@@ -2,34 +2,34 @@ import requests
 import aiohttp
 
 def txt2img(endpoint, payload): 
-    return requests.post(url=f'{endpoint}/sdapi/v1/txt2img', json=payload)
+    return requests.post(url=f"{endpoint}/sdapi/v1/txt2img", json=payload)
 
 def get_models(endpoint):
-    return requests.get(url=f'{endpoint}/sdapi/v1/sd-models')
+    return requests.get(url=f"{endpoint}/sdapi/v1/sd-models")
 
 def get_samplers(endpoint):
-    return requests.get(url=f'{endpoint}/sdapi/v1/samplers')
+    return requests.get(url=f"{endpoint}/sdapi/v1/samplers")
 
 def get_styles(endpoint):
-    return requests.get(url=f'{endpoint}/sdapi/v1/prompt-styles')
+    return requests.get(url=f"{endpoint}/sdapi/v1/prompt-styles")
 
 def get_upscalers(endpoint):
-    return requests.get(url=f'{endpoint}/sdapi/v1/upscalers')
+    return requests.get(url=f"{endpoint}/sdapi/v1/upscalers")
 
 def upscale_single(endpoint, payload):
-    return requests.post(url=f'{endpoint}/sdapi/v1/extra-single-image', json=payload)
+    return requests.post(url=f"{endpoint}/sdapi/v1/extra-single-image", json=payload)
 
 async def txt2img_async(endpoint, payload):
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{endpoint}/sdapi/v1/txt2img', json=payload) as resp:
+        async with session.post(url=f"{endpoint}/sdapi/v1/txt2img", json=payload) as resp:
             return {"json": await resp.json(), "status": resp.status}
 
 async def upscale_single_async(endpoint, payload):
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{endpoint}/sdapi/v1/extra-single-image', json=payload) as resp:
+        async with session.post(url=f"{endpoint}/sdapi/v1/extra-single-image", json=payload) as resp:
             return {"json": await resp.json(), "status": resp.status}
         
 async def set_settings_async(endpoint, payload):
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{endpoint}/sdapi/v1/options', json=payload) as resp:
+        async with session.post(url=f"{endpoint}/sdapi/v1/options", json=payload) as resp:
             return {"json": await resp.json(), "status": resp.status}

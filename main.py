@@ -23,7 +23,7 @@ async def main():
     bot = CarlBot()
     watcher = Watcher(bot, "cogs/", preload=True)
     await watcher.start()
-    await bot.start(os.getenv('BOT_TOKEN'))
+    await bot.start(os.getenv("BOT_TOKEN"))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
