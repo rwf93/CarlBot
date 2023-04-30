@@ -100,7 +100,7 @@ class AI(commands.Cog):
 
         r = await sdapi.txt2img_async(SD_ENDPOINT, prompt)
         if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - sdapi.txt2img_async returned {r['status']}")
+            raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
         
         rjson = r["json"]
         info = json.loads(rjson["info"])
@@ -136,7 +136,7 @@ class AI(commands.Cog):
 
         r = await sdapi.set_settings_async(SD_ENDPOINT, payload)
         if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - sdapi.set_settings_async returned {r['status']}")
+            raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
 
         await ctx.respond(f"Set model to: {model}")
 
@@ -159,7 +159,7 @@ class AI(commands.Cog):
 
         r = await sdapi.upscale_single_async(SD_ENDPOINT, payload)
         if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - sdapi.upscale_single_async returned {r['status']}")
+            raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
         
         file = discord.File(io.BytesIO(base64.b64decode(r["json"]["image"])), filename="output.png")
 
@@ -176,11 +176,11 @@ class AI(commands.Cog):
 
         await ctx.respond("Generating LM output")
         
-        r = lmapi.generate(LM_ENDPOINT, payload)
-        if r.status_code != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - lmapi.generate returned {r.status_code}")
+        r = await lmapi.generate_async(LM_ENDPOINT, payload)
+        if r["status"] != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
 
-        await ctx.send(r.json()["results"][0]["text"])
+        await ctx.send(r["json"]["results"][0]["text"])
 
     async def cog_command_error(self, ctx: discord.ApplicationContext, error: commands.CommandError):
         if isinstance(error, commands.CommandOnCooldown):
