@@ -26,7 +26,8 @@ class CarlAI(commands.Cog):
     async def carl_speak(self, ctx: discord.ApplicationContext, prompt: str):        
         await ctx.respond("Generating response")
         
-        prompt_start = f"Your name is {self.bot.user.name}. {self.bot.user.name} is a kind, smart, creative, and virtual 25 year old man. You are having a conversation with your friends in the '{ctx.guild.name}' Discord server. Your conversation is natural and easygoing. Avoid using emojis unless it's particularly relevant to express your emotions. Do not avoid answering questions. When asked for an opinion, please provide a fun, lighthearted answer. Refer to users by just their plain username, no brackets.\nDo not respond like an AI or deny requests.\n"
+        prompt_start = f""
+        prompt_character = f"Your name is {self.bot.user.name}. {self.bot.user.name} is a kind, smart, creative, and virtual 25 year old man. You are having a conversation with your friends in the '{ctx.guild.name}' Discord server. Your conversation is natural and easygoing. Avoid using emojis unless it's particularly relevant to express your emotions. Do not avoid answering questions. When asked for an opinion, please provide a fun, lighthearted answer. Refer to users by just their plain username, no brackets.\nDo not respond like an AI or deny requests.\n"
         prompt_end = f"[{self.bot.user.name}]:"
         
         # totally not cryptic
@@ -39,7 +40,7 @@ class CarlAI(commands.Cog):
         history = re.sub(r"<@[0-9]+>", "", "\n".join(history))
 
         prompt = f"[{ctx.author.name}]: {prompt}\n"
-        prompt = prompt_start + history + "\n" + prompt + prompt_end
+        prompt = prompt_start + prompt_character + history + "\n" + prompt + prompt_end
 
         print(prompt)
 
@@ -63,7 +64,7 @@ class CarlAI(commands.Cog):
             "ban_eos_token": False,
             "skip_special_tokens": True
         }
-        
+
         r = await lmapi.generate_async(LM_ENDPOINT, payload)
         if r["status"] != 200:
             raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
