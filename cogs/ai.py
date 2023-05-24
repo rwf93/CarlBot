@@ -80,7 +80,6 @@ class AI(commands.Cog):
     async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: float, width: int, height: int, sampler: str, styles: str, seed: int):
         # sneaky beaky
         await ctx.respond("Please wait while we generate your ~~\x70\x6f\x72\x6e~~ image")
-
         prompt = {
             "prompt":           prompt,
             "negative_prompt":  negative_prompt,

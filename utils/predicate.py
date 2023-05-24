@@ -11,13 +11,7 @@ def is_owner():
 def is_manager():
     async def predicate(ctx: discord.ApplicationContext):
         if ctx.author.id == int(os.getenv("BOT_OWNER")): return True
-        admin_roles = list(map(
-            lambda x: int(x),
-            os.getenv("BOT_MANAGER_ROLES").split(",")
-        ))
-        snowflake_roles = list(map(
-            lambda x: x.id,
-            ctx.author.roles
-        ))
+        admin_roles     = [int(x) for x in os.getenv("BOT_MANAGER_ROLES").split(",")]
+        snowflake_roles = [x.id for x in ctx.author.roles]
         return any(x in admin_roles for x in snowflake_roles)
     return commands.check(predicate)
