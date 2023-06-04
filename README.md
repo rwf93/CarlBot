@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/rwf93/CarlBot/blob/master/LICENSE)
 
-CarlBot is a discord bot used for interacting with the AUTOMATIC1111's [Stable Diffusion Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) and oobabooga's [text-generation-webui](https://github.com/oobabooga/text-generation-webui).
+CarlBot is a discord bot used for interacting with the Vladmandic's [Stable Diffusion Web UI](https://github.com/vladmandic/automatic) fork and oobabooga's [text-generation-webui](https://github.com/oobabooga/text-generation-webui).
 
 ## Installation
 
@@ -27,4 +27,4 @@ Profit?
 
 ## Credits
 [SallyBot](https://github.com/DeSinc/SallyBot) - DeSinc's sally bot, my main inspiration for the bot  
-[Sally.py](https://github.com/whois-hoeless) - whois-hoeless' port of SallyBot, little bits of prompting used in cogs/carl.py
+[Sally.py](https://github.com/whois-hoeless/Sally.py) - whois-hoeless' port of SallyBot, little bits of prompting used in cogs/carl.py

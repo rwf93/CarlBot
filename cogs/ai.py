@@ -65,7 +65,7 @@ class AI(commands.Cog):
         self.models_json    = sdapi.get_models(SD_ENDPOINT).json()
         self.styles_json    = sdapi.get_styles(SD_ENDPOINT).json()
         self.upscalers_json = sdapi.get_upscalers(SD_ENDPOINT).json()
-    
+
     @commands.slash_command(name="sdprompt")
     @commands.cooldown(1, 10, commands.BucketType.user)
     @option("prompt",           description="Prompt (what you want)")
@@ -77,7 +77,8 @@ class AI(commands.Cog):
     @option("sampler",          autocomplete=samplers_autocomplete, default="Euler a")
     @option("styles",           autocomplete=styles_autocomplete, default="")
     @option("seed",             default=-1)
-    async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: float, width: int, height: int, sampler: str, styles: str, seed: int):
+    @option("clip_skip",        default=2)
+    async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: float, width: int, height: int, sampler: str, styles: str, seed: int, clip_skip: int):
         # sneaky beaky
         await ctx.respond("Please wait while we generate your ~~\x70\x6f\x72\x6e~~ image")
         prompt = {
@@ -95,6 +96,8 @@ class AI(commands.Cog):
             "styles":           [ styles ],
             # sneed
             "seed":             seed,
+
+            "clip_skip": clip_skip
         }
 
         r = await sdapi.txt2img_async(SD_ENDPOINT, prompt)
