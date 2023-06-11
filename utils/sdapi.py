@@ -1,5 +1,5 @@
 import requests
-import aiohttp
+from utils.common_async import async_post
 
 def txt2img(endpoint, payload): 
     return requests.post(url=f"{endpoint}/sdapi/v1/txt2img", json=payload)
@@ -19,17 +19,11 @@ def get_upscalers(endpoint):
 def upscale_single(endpoint, payload):
     return requests.post(url=f"{endpoint}/sdapi/v1/extra-single-image", json=payload)
 
-async def txt2img_async(endpoint, payload):
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=f"{endpoint}/sdapi/v1/txt2img", json=payload) as resp:
-            return {"json": await resp.json(), "status": resp.status}
+async def txt2img_async(endpoint: str, payload: dict):
+    return await async_post(endpoint, "/sdapi/v1/txt2img", payload)
 
 async def upscale_single_async(endpoint, payload):
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=f"{endpoint}/sdapi/v1/extra-single-image", json=payload) as resp:
-            return {"json": await resp.json(), "status": resp.status}
+    return await async_post(endpoint, "/sdapi/v1/extra-single-image", payload)
         
 async def set_settings_async(endpoint, payload):
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=f"{endpoint}/sdapi/v1/options", json=payload) as resp:
-            return {"json": await resp.json(), "status": resp.status}
+    return await async_post(endpoint, "/sdapi/v1/options", payload)

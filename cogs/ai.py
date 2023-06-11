@@ -81,6 +81,7 @@ class AI(commands.Cog):
     async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: float, width: int, height: int, sampler: str, styles: str, seed: int, clip_skip: int):
         # sneaky beaky
         await ctx.respond("Please wait while we generate your ~~\x70\x6f\x72\x6e~~ image")
+        
         prompt = {
             "prompt":           prompt,
             "negative_prompt":  negative_prompt,
@@ -100,11 +101,10 @@ class AI(commands.Cog):
             "clip_skip": clip_skip
         }
 
-        r = await sdapi.txt2img_async(SD_ENDPOINT, prompt)
-        if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
-        
-        rjson = r["json"]
+        rjson, status = await sdapi.txt2img_async(SD_ENDPOINT, prompt)
+        if status != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
+
         info = json.loads(rjson["info"])
 
         for idx, i in enumerate(rjson["images"]):
@@ -136,9 +136,9 @@ class AI(commands.Cog):
     
         await ctx.respond("Setting model")
 
-        r = await sdapi.set_settings_async(SD_ENDPOINT, payload)
-        if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
+        _, status = await sdapi.set_settings_async(SD_ENDPOINT, payload)
+        if status != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
 
         await ctx.respond(f"Set model to: {model}")
 
@@ -159,11 +159,11 @@ class AI(commands.Cog):
             "image":            b64_image
         }
 
-        r = await sdapi.upscale_single_async(SD_ENDPOINT, payload)
-        if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
+        rjson, status = await sdapi.upscale_single_async(SD_ENDPOINT, payload)
+        if status != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
         
-        file = discord.File(io.BytesIO(base64.b64decode(r["json"]["image"])), filename="output.png")
+        file = discord.File(io.BytesIO(base64.b64decode(rjson["image"])), filename="output.png")
 
         await ctx.respond(file=file)
 
@@ -178,21 +178,11 @@ class AI(commands.Cog):
 
         await ctx.respond("Generating LM output")
         
-        r = await lmapi.generate_async(LM_ENDPOINT, payload)
-        if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
+        rjson, status = await lmapi.generate_async(LM_ENDPOINT, payload)
+        if status != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
 
-        await ctx.send(r["json"]["results"][0]["text"])
-
-    async def cog_command_error(self, ctx: discord.ApplicationContext, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.respond("You're on cooldown", ephemeral=True)
-        
-        if isinstance(error, commands.MaxConcurrencyReached):
-            await ctx.respond("Max concurrency reached on command", ephemeral=True)
-    
-        if isinstance(error, commands.CommandInvokeError):
-            await ctx.respond(error.original, ephemeral=True)
+        await ctx.send(rjson["results"][0]["text"])
 
 def setup(bot):
     bot.add_cog(AI(bot))

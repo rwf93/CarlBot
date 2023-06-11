@@ -63,11 +63,11 @@ class CarlAI(commands.Cog):
             "skip_special_tokens": True
         }
 
-        r = await lmapi.generate_async(LM_ENDPOINT, payload)
-        if r["status"] != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - returned {r['status']}")
+        rjson, status = await lmapi.generate_async(LM_ENDPOINT, payload)
+        if status != 200:
+            raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
 
-        await ctx.send(r["json"]["results"][0]["text"])
+        await ctx.send(rjson["results"][0]["text"])
 
 def setup(bot):
     bot.add_cog(CarlAI(bot))
