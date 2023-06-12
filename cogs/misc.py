@@ -8,7 +8,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command(name = "ping")
     async def ping(self, ctx):
-        await ctx.respond(f"Pong! ({round(self.bot.latency, 1)}ms)")
+        await ctx.respond(f"Pong! ({round(self.bot.latency * 1000, 1)}ms)")
 
 def setup(bot):
     bot.add_cog(Misc(bot))

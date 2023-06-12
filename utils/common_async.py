@@ -1,4 +1,3 @@
-# because we can't have nice things
 import aiohttp
 
 async def async_post(endpoint: str, secondary: str, payload: dict):

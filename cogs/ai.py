@@ -1,4 +1,4 @@
-''' A raw method of interacting with SDAPI and LMAPI '''
+""" A raw method of interacting with SDAPI and LMAPI """
 
 import os
 import io

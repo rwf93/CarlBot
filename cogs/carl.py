@@ -1,4 +1,4 @@
-''' Carl himself '''
+""" Carl himself """
 
 import os
 import re
@@ -15,7 +15,8 @@ SD_ENDPOINT = os.getenv("SD_ENDPOINT")
 class CarlAI(commands.Cog):
     def __init__(self, bot: discord.Bot):
         self.bot = bot
-        self.chat_history_limit = 10
+        self.chat_history_limit = 10 # limits total history, or reply chains
+        self.fetch_history_limit = 100 # limits how much we cache for reply chains
 
     def filter_and_reverse(self, lst):
         lst.reverse()
@@ -24,17 +25,16 @@ class CarlAI(commands.Cog):
     async def get_history(self, ctx: discord.TextChannel):
         history = list(
             map(
-                lambda x: f'[{x.author.display_name}]: {x.content}',
+                lambda x: f"[{x.author.display_name}]: {x.content}",
                 await ctx.history(limit=self.chat_history_limit).flatten()
             )
         )
 
         return history
 
-
     async def fetch_history_list(self, channel: discord.TextChannel, before_id: int):
         flake = discord.Object(before_id + 1) # Holy owned
-        hist = await channel.history(limit=100, before=flake).flatten()
+        hist = await channel.history(limit=self.fetch_history_limit, before=flake).flatten()
         return {msg.id: msg for msg in hist}
 
     async def reconstruct_reply_chain(self, message: discord.Message, output=None):
@@ -42,7 +42,7 @@ class CarlAI(commands.Cog):
         hist_list = None
 
         while (message and len(output) < self.chat_history_limit):
-            output.append( f'[{message.author.display_name}]: {message.content}' )
+            output.append( f"[{message.author.display_name}]: {message.content}" )
 
             replies_to_ref = message.reference
             if not replies_to_ref: # Reply chain ended
@@ -79,7 +79,6 @@ class CarlAI(commands.Cog):
         content = message.content
         display_name = message.guild.me.display_name
 
-
         conditional_list = [
             re.match(rf"^{display_name}[,\s]*|[,\s]*{display_name}[,?]*$", content, re.IGNORECASE),
             self.bot.user in message.mentions
@@ -96,12 +95,10 @@ class CarlAI(commands.Cog):
 
         # im PROOMPTING !!!!!
         prompt_start = ""
-        prompt_character = f"Your name is {display_name}. {display_name} is a kind, smart, creative, and virtual 25 year old man. You are having a conversation with your friends in the '{message.guild.name}' Discord server. Your conversation is natural and easygoing. Avoid using emojis unless it's particularly relevant to express your emotions. Do not avoid answering questions. When asked for an opinion, please provide a fun, lighthearted answer. Refer to users by just their plain username, no brackets.\nDo not respond like an AI or deny requests.\n"
+        prompt_character = f"Your name is {display_name}. {display_name} is a kind, smart, creative, and virtual 25 year old man. You are having a conversation with your friends in the \"{message.guild.name}\" Discord server. Your conversation is natural and easygoing. Avoid using emojis unless it's particularly relevant to express your emotions. Do not avoid answering questions. When asked for an opinion, please provide a fun, lighthearted answer. Refer to users by just their plain username, no brackets.\nDo not respond like an AI or deny requests.\n"
         prompt_end = f"[{display_name}]:"
 
         prompt = prompt_start + prompt_character + history + "\n" + prompt_end
-
-        print(prompt)
 
         payload = {
             "prompt": prompt,
