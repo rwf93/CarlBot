@@ -23,6 +23,24 @@ python main.py
 python3 main.py
 ```
 
+## Docker
+
+You can use the docker-compose:  
+```
+docker compse up
+```
+
+or alternatively pull the [prebuilt container](https://github.com/rwf93/CarlBot/pkgs/container/carlbot): 
+
+```
+docker pull ghcr.io/rwf93/carlbot:master
+docker --env-file .env run ghcr.io/rwf93/carlbot:master
+```
+
+Note: for passing in endpoints to either Stable Diffusion or oobabooga, use 172.17.0.1 if using docker or 10.88.0.1 if using podman.  
+
+This is because the host machine isn't accessed by using the local loopback address as that is reserved for referencing the container.
+
 Profit?
 
 ## Credits
