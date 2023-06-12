@@ -90,7 +90,7 @@ class CarlAI(commands.Cog):
 
         # if the message is a reply, reconstruct from previous replies (if any)
         if message.reference:
-            history = await self.reconstruct_reply_chain(message) # evil recursion
+            history = await self.reconstruct_reply_chain(message)
 
         history = self.filter_and_reverse(history)
 
