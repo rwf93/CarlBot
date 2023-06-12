@@ -17,13 +17,3 @@ def fuzzy_autocomplete(ctx, items):
             process.extract(ctx.value.lower(), items)
         )
     )
-
-async def get_history(ctx: discord.ApplicationContext | discord.TextChannel, lim: int):
-    history = list(
-        map(
-            lambda x: f"[{x.author.name}]: {x.content}",
-            await ctx.history(limit=lim).flatten()
-        )
-    )
-
-    return re.sub(r"<@[0-9]+>", "", "\n".join(history))

@@ -1,3 +1,5 @@
+''' A raw method of interacting with SDAPI and LMAPI '''
+
 import os
 import io
 import base64
@@ -13,7 +15,7 @@ import utils.sdapi as sdapi
 import utils.lmapi as lmapi
 
 import utils.predicate as predicates
-import utils.util as util
+import utils.autocomplete as autocomplete
 
 SD_ENDPOINT = os.getenv("SD_ENDPOINT")
 LM_ENDPOINT = os.getenv("LM_ENDPOINT")
@@ -24,7 +26,7 @@ class AI(commands.Cog):
         self.invalidate_sdcache.start()
 
     def samplers_autocomplete(self, ctx):
-        samplers = util.basic_autocomplete(ctx, map(
+        samplers = autocomplete.basic_autocomplete(ctx, map(
             lambda i: i["name"],
             self.sampler_json
         ))
@@ -32,7 +34,7 @@ class AI(commands.Cog):
         return samplers
 
     def models_autocomplete(self, ctx):
-        models = util.basic_autocomplete(ctx, map(
+        models = autocomplete.basic_autocomplete(ctx, map(
             lambda i: i["title"],
             self.models_json
         ))
@@ -40,7 +42,7 @@ class AI(commands.Cog):
         return models
 
     def styles_autocomplete(self, ctx):
-        styles = util.basic_autocomplete(ctx, map(
+        styles = autocomplete.basic_autocomplete(ctx, map(
             lambda i: i["name"],
             self.styles_json
         ))
@@ -48,7 +50,7 @@ class AI(commands.Cog):
         return styles
 
     def upscalers_autocomplete(self, ctx):
-        upscalers = util.basic_autocomplete(ctx, map(
+        upscalers = autocomplete.basic_autocomplete(ctx, map(
             lambda i: i["name"],
             self.upscalers_json
         ))
