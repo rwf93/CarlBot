@@ -6,12 +6,15 @@ CarlBot is a discord bot used for interacting with the Vladmandic's [Stable Diff
 
 ## Installation
 
+CarlBot expects at least [Python 3.10.9](https://www.python.org/downloads/release/python-3109/) or higher.
+
 Copy the .env.sample to .env and populate it with the requirered values.
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the deps.
 
 ```bash
 python -m venv venv
+.\venv\Scripts\activate or .\venv\bin\activate
 pip install -r requirements.txt
 ```
 ### Windows
@@ -25,12 +28,12 @@ python3 main.py
 
 ## Docker
 
-You can use the docker-compose:  
+You can use the docker-compose:
 ```
-docker compse up
+docker compose up
 ```
 
-or alternatively pull the [prebuilt container](https://github.com/rwf93/CarlBot/pkgs/container/carlbot): 
+or alternatively pull the [prebuilt container](https://github.com/rwf93/CarlBot/pkgs/container/carlbot):
 
 ```
 docker pull ghcr.io/rwf93/carlbot:master
