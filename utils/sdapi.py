@@ -1,7 +1,7 @@
 import requests
 from utils.common_async import async_post
 
-def txt2img(endpoint, payload): 
+def txt2img(endpoint, payload):
     return requests.post(url=f"{endpoint}/sdapi/v1/txt2img", json=payload)
 
 def get_models(endpoint):
@@ -24,6 +24,6 @@ async def txt2img_async(endpoint: str, payload: dict):
 
 async def upscale_single_async(endpoint, payload):
     return await async_post(endpoint, "/sdapi/v1/extra-single-image", payload)
-        
+
 async def set_settings_async(endpoint, payload):
     return await async_post(endpoint, "/sdapi/v1/options", payload)

@@ -23,13 +23,13 @@ class CarlBot(discord.Bot):
     async def on_application_command_error(self, ctx: discord.ApplicationContext, exception: discord.DiscordException):
         if isinstance(exception, commands.CommandOnCooldown):
             await ctx.respond("You're on cooldown")
-        
+
         if isinstance(exception, commands.MaxConcurrencyReached):
             await ctx.respond("Max concurrency reached on command")
-    
+
         if isinstance(exception, commands.CommandInvokeError):
             await ctx.respond(exception.original)
-        
+
 async def main():
     bot = CarlBot()
     watcher = Watcher(bot, "cogs/", preload=True)

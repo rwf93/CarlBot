@@ -23,7 +23,6 @@ class AI(commands.Cog):
         self.bot = bot
         self.invalidate_sdcache.start()
 
-    @staticmethod
     def samplers_autocomplete(self, ctx):
         samplers = autocomplete.basic_autocomplete(ctx, map(
             lambda i: i["name"],
@@ -31,17 +30,15 @@ class AI(commands.Cog):
         ))
 
         return samplers
-    
-    @staticmethod
+
     def models_autocomplete(self, ctx):
         models = autocomplete.basic_autocomplete(ctx, map(
             lambda i: i["title"],
             self.models_json
         ))
-        
+
         return models
 
-    @staticmethod
     def styles_autocomplete(self, ctx):
         styles = autocomplete.basic_autocomplete(ctx, map(
             lambda i: i["name"],
@@ -49,8 +46,7 @@ class AI(commands.Cog):
         ))
 
         return styles
-    
-    @staticmethod
+
     def upscalers_autocomplete(self, ctx):
         upscalers = autocomplete.basic_autocomplete(ctx, map(
             lambda i: i["name"],
@@ -81,19 +77,19 @@ class AI(commands.Cog):
     async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: float, width: int, height: int, sampler: str, styles: str, seed: int, clip_skip: int):
         # sneaky beaky
         await ctx.respond("Please wait while we generate your ~~\x70\x6f\x72\x6e~~ image")
-        
+
         prompt = {
             "prompt":           prompt,
             "negative_prompt":  negative_prompt,
-            
+
             "steps":            steps,
             "cfg_scale":        cfg_scale,
-            
+
             "width":            width,
             "height":           height,
 
             "sampler_index":    sampler,
-            
+
             "styles":           [ styles ],
             # sneed
             "seed":             seed,
@@ -116,12 +112,12 @@ class AI(commands.Cog):
             embed = discord.Embed(
                 color=discord.Color.random(seed=info_seed)
             )
-            
+
             embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
             embed.set_image(url="attachment://output.png")
-            
+
             embed.add_field(name="Seed", value=f"{info_seed}")
-            embed.add_field(name="Model", value=info_model)            
+            embed.add_field(name="Model", value=info_model)
 
             await ctx.send(file=file, embed=embed)
 
@@ -133,7 +129,7 @@ class AI(commands.Cog):
         payload = {
             "sd_model_checkpoint": model
         }
-    
+
         await ctx.respond("Setting model")
 
         _, status = await sdapi.set_settings_async(SD_ENDPOINT, payload)
@@ -149,9 +145,9 @@ class AI(commands.Cog):
     @predicates.is_manager()
     async def sd_upscale(self, ctx: discord.ApplicationContext, file: discord.Attachment, upscaler_one: str, upscaler_two: str, upscaler_amt: float):
         await ctx.respond("Upscaling image")
-        
+
         b64_image = "data:image/png;base64," + base64.b64encode(requests.get(file.url, stream=True).content).decode("utf-8")
-        
+
         payload = {
             "upscaler_1":       upscaler_one,
             "upscaler_2":       upscaler_two,
@@ -162,7 +158,7 @@ class AI(commands.Cog):
         rjson, status = await sdapi.upscale_single_async(SD_ENDPOINT, payload)
         if status != 200:
             raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
-        
+
         file = discord.File(io.BytesIO(base64.b64decode(rjson["image"])), filename="output.png")
 
         await ctx.respond(file=file)
@@ -177,7 +173,7 @@ class AI(commands.Cog):
         }
 
         await ctx.respond("Generating LM output")
-        
+
         rjson, status = await lmapi.generate_async(LM_ENDPOINT, payload)
         if status != 200:
             raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
