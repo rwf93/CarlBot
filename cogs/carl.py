@@ -31,15 +31,45 @@ class CarlAI(commands.Cog):
 
         return history
 
-    async def reconstruct_reply_chain(self, message: discord.Message, recurse, count):
-        recurse = recurse + [ f'[{message.author.display_name}]: {message.content}' ]
 
-        if count >= self.chat_history_limit: return recurse
-        if not message.reference: return recurse
+    async def fetch_history_list(self, channel: discord.TextChannel, before_id: int):
+        flake = discord.Object(before_id + 1) # Holy owned
+        hist = await channel.history(limit=100, before=flake).flatten()
+        return {msg.id: msg for msg in hist}
 
-        message_ref = await message.channel.fetch_message(message.reference.message_id)
-        return await self.reconstruct_reply_chain(message_ref, recurse, count+1)
+    async def reconstruct_reply_chain(self, message: discord.Message, output=None):
+        output = output or []
+        hist_list = None
 
+        while (message and len(output) < self.chat_history_limit):
+            output.append( f'[{message.author.display_name}]: {message.content}' )
+
+            replies_to_ref = message.reference
+            if not replies_to_ref: # Reply chain ended
+                break
+
+            replies_to_msg = self.bot.get_message(replies_to_ref.message_id) # In my tests, the .cached_message member never worked (!?)
+
+            if not replies_to_msg:
+                # The message replies to a message that we don't have cached, so we only have a reference to it (ie the ID)
+                # Try to look it up in the history we already might have (ie after the first fetch)
+
+                if hist_list:
+                    replies_to_msg = hist_list.get(replies_to_ref.message_id)
+
+                if not replies_to_msg:
+                    # We either didn't have the message in history or never fetched it in the first place
+                    # Grab the (new?) history and try to get the contents again
+                    hist_list = await self.fetch_history_list(message.channel, replies_to_ref.message_id);
+                    replies_to_msg = hist_list.get(replies_to_ref.message_id)
+
+            if not replies_to_msg:
+                break # epical failure!!!
+
+            # if we're here, we got a full reply message successfully
+            message = replies_to_msg # now do it all over again
+
+        return output
 
     # creds desinc and whois-hoeless, yanked lil bit of your prompting code :^)
     @discord.Cog.listener("on_message")
@@ -60,7 +90,7 @@ class CarlAI(commands.Cog):
 
         # if the message is a reply, reconstruct from previous replies (if any)
         if message.reference:
-            history = await self.reconstruct_reply_chain(message, [], 0) # evil recursion
+            history = await self.reconstruct_reply_chain(message)
 
         history = self.filter_and_reverse(history)
 
