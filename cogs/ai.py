@@ -1,9 +1,3 @@
-import utils.sdapi as sdapi
-import utils.lmapi as lmapi
-
-import utils.predicate as predicates
-import utils.autocomplete as autocomplete
-
 import os
 import io
 import base64
@@ -15,6 +9,12 @@ import discord
 from discord.ext import commands, tasks
 from discord import option
 
+import utils.sdapi as sdapi
+import utils.lmapi as lmapi
+
+import utils.predicate as predicates
+import utils.util as util
+
 SD_ENDPOINT = os.getenv("SD_ENDPOINT")
 LM_ENDPOINT = os.getenv("LM_ENDPOINT")
 
@@ -24,7 +24,7 @@ class AI(commands.Cog):
         self.invalidate_sdcache.start()
 
     def samplers_autocomplete(self, ctx):
-        samplers = autocomplete.basic_autocomplete(ctx, map(
+        samplers = util.basic_autocomplete(ctx, map(
             lambda i: i["name"],
             self.sampler_json
         ))
@@ -32,7 +32,7 @@ class AI(commands.Cog):
         return samplers
 
     def models_autocomplete(self, ctx):
-        models = autocomplete.basic_autocomplete(ctx, map(
+        models = util.basic_autocomplete(ctx, map(
             lambda i: i["title"],
             self.models_json
         ))
@@ -40,7 +40,7 @@ class AI(commands.Cog):
         return models
 
     def styles_autocomplete(self, ctx):
-        styles = autocomplete.basic_autocomplete(ctx, map(
+        styles = util.basic_autocomplete(ctx, map(
             lambda i: i["name"],
             self.styles_json
         ))
@@ -48,7 +48,7 @@ class AI(commands.Cog):
         return styles
 
     def upscalers_autocomplete(self, ctx):
-        upscalers = autocomplete.basic_autocomplete(ctx, map(
+        upscalers = util.basic_autocomplete(ctx, map(
             lambda i: i["name"],
             self.upscalers_json
         ))
@@ -78,7 +78,7 @@ class AI(commands.Cog):
         # sneaky beaky
         await ctx.respond("Please wait while we generate your ~~\x70\x6f\x72\x6e~~ image")
 
-        prompt = {
+        payload = {
             "prompt":           prompt,
             "negative_prompt":  negative_prompt,
 
@@ -97,7 +97,7 @@ class AI(commands.Cog):
             "clip_skip": clip_skip
         }
 
-        rjson, status = await sdapi.txt2img_async(SD_ENDPOINT, prompt)
+        rjson, status = await sdapi.txt2img_async(SD_ENDPOINT, payload)
         if status != 200:
             raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
 
