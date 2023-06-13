@@ -1,8 +1,10 @@
+from main import CarlBot
+
 import utils.predicate as predicate
 from discord.ext import commands
 
 class Misc(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: CarlBot):
         self.bot = bot
         self._last_member = None
 

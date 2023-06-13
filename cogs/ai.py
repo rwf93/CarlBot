@@ -7,6 +7,8 @@ import json
 import re
 import requests
 
+from main import CarlBot
+
 import discord
 from discord.ext import commands, tasks
 from discord import option
@@ -21,7 +23,7 @@ SD_ENDPOINT = os.getenv("SD_ENDPOINT")
 LM_ENDPOINT = os.getenv("LM_ENDPOINT")
 
 class AI(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: CarlBot):
         self.bot = bot
         self.invalidate_sdcache.start()
 

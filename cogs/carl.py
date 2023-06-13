@@ -3,6 +3,8 @@
 import os
 import re
 
+from main import CarlBot
+
 import discord
 from discord.ext import commands
 
@@ -13,7 +15,7 @@ LM_ENDPOINT = os.getenv("LM_ENDPOINT")
 SD_ENDPOINT = os.getenv("SD_ENDPOINT")
 
 class CarlAI(commands.Cog):
-    def __init__(self, bot: discord.Bot):
+    def __init__(self, bot: CarlBot):
         self.bot = bot
         self.chat_history_limit = 10 # limits total history, or reply chains
         self.fetch_history_limit = 100 # limits how much we cache for reply chains
