@@ -11,6 +11,7 @@ from main import CarlBot
 
 import discord
 from discord.ext import commands, tasks
+from discord.ext.pages import Paginator, Page
 from discord import option
 
 import utils.sdapi as sdapi
@@ -78,9 +79,18 @@ class AI(commands.Cog):
     @option("styles",           autocomplete=styles_autocomplete, default="")
     @option("seed",             default=-1)
     @option("clip_skip",        default=2, max=4)
-    async def sd_prompt(self, ctx: discord.ApplicationContext, prompt: str, negative_prompt: str, steps: int, cfg_scale: float, width: int, height: int, sampler: str, styles: str, seed: int, clip_skip: int):
-        # sneaky beaky
-        await ctx.respond("Please wait while we generate your ~~\x70\x6f\x72\x6e~~ image")
+    @option("batch_size",      default=1, max=4)
+    async def sd_prompt(self, ctx: discord.ApplicationContext,
+                        prompt: str, negative_prompt:
+                        str, steps: int, cfg_scale:
+                        float, width: int, height: int,
+                        sampler: str,
+                        styles: str,
+                        seed: int,
+                        clip_skip: int,
+                        batch_size: int
+                    ):
+        await ctx.defer()
 
         payload = {
             "prompt":           prompt,
@@ -98,7 +108,9 @@ class AI(commands.Cog):
             # sneed
             "seed":             seed,
 
-            "clip_skip": clip_skip
+            "clip_skip": clip_skip,
+
+            "batch_size": batch_size
         }
 
         rjson, status = await sdapi.txt2img_async(SD_ENDPOINT, payload)
@@ -106,6 +118,8 @@ class AI(commands.Cog):
             raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
 
         info = json.loads(rjson["info"])
+
+        pages = []
 
         for idx, i in enumerate(rjson["images"]):
             file = discord.File(io.BytesIO(base64.b64decode(i.split(",",1)[0])), filename="output.png")
@@ -121,20 +135,26 @@ class AI(commands.Cog):
             embed.set_image(url="attachment://output.png")
 
             embed.add_field(name="Seed", value=f"{info_seed}")
-            embed.add_field(name="Model", value=info_model)
+            embed.add_field(name="Model", value=info_model)\
 
-            await ctx.send(file=file, embed=embed)
+            pages.append(Page(
+                embeds=[ embed ],
+                files=[ file ]
+            ))
+
+        paginator = Paginator(pages=pages)
+        await paginator.respond(ctx.interaction)
 
     @commands.slash_command(name="sdmodel")
     @commands.max_concurrency(1, commands.BucketType.guild)
     @option("model", autocomplete=models_autocomplete, description="Model you want")
     @predicates.is_manager()
     async def sd_model(self, ctx: discord.ApplicationCommand, model: str):
+        await ctx.defer()
+
         payload = {
             "sd_model_checkpoint": model
         }
-
-        await ctx.respond("Setting model")
 
         _, status = await sdapi.set_settings_async(SD_ENDPOINT, payload)
         if status != 200:
@@ -148,7 +168,7 @@ class AI(commands.Cog):
     @option("upscaler_amt",       default=2, max=4)
     @predicates.is_manager()
     async def sd_upscale(self, ctx: discord.ApplicationContext, file: discord.Attachment, upscaler_one: str, upscaler_two: str, upscaler_amt: float):
-        await ctx.respond("Upscaling image")
+        await ctx.defer()
 
         b64_image = "data:image/png;base64," + base64.b64encode(requests.get(file.url, stream=True).content).decode("utf-8")
 
@@ -171,12 +191,12 @@ class AI(commands.Cog):
     @predicates.is_manager()
     @option("prompt")
     async def lm_prompt(self, ctx: discord.ApplicationCommand, prompt: str):
+        await ctx.defer()
+
         payload = {
             "prompt": prompt,
             "max_new_tokens": 250,
         }
-
-        await ctx.respond("Generating LM output")
 
         rjson, status = await lmapi.generate_async(LM_ENDPOINT, payload)
         if status != 200:

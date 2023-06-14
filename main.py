@@ -20,6 +20,7 @@ class CarlBot(discord.Bot):
         print("Ready.")
 
     async def on_application_command_error(self, ctx: discord.ApplicationContext, exception: discord.DiscordException):
+        print(exception)
         if isinstance(exception, commands.CommandOnCooldown):
             await ctx.respond("You're on cooldown")
 

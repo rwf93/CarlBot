@@ -1,6 +1,7 @@
 from main import CarlBot
 
 import utils.predicate as predicate
+import discord
 from discord.ext import commands
 
 class Misc(commands.Cog):
@@ -9,7 +10,7 @@ class Misc(commands.Cog):
         self._last_member = None
 
     @commands.slash_command(name = "ping")
-    async def ping(self, ctx):
+    async def ping(self, ctx: discord.ApplicationContext):
         await ctx.respond(f"Pong! ({round(self.bot.latency * 1000, 1)}ms)")
 
 def setup(bot):
