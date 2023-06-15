@@ -26,6 +26,12 @@ LM_ENDPOINT = os.getenv("LM_ENDPOINT")
 class AI(commands.Cog):
     def __init__(self, bot: CarlBot):
         self.bot = bot
+
+        self.sampler_json   = []
+        self.models_json    = []
+        self.styles_json    = []
+        self.upscalers_json = []
+
         self.invalidate_sdcache.start()
 
     def samplers_autocomplete(self, ctx):
@@ -79,7 +85,7 @@ class AI(commands.Cog):
     @option("styles",           autocomplete=styles_autocomplete, default="")
     @option("seed",             default=-1)
     @option("clip_skip",        default=2, max=4)
-    @option("batch_size",      default=1, max=4)
+    @option("batch_size",       default=1, max=4)
     async def sd_prompt(self, ctx: discord.ApplicationContext,
                         prompt: str, negative_prompt:
                         str, steps: int, cfg_scale:
