@@ -128,7 +128,7 @@ class CarlAI(commands.Cog):
         # TODO(rwf93): implement websockets instead maybe?
         rjson, status = await lmapi.generate_async(LM_ENDPOINT, payload)
         if status != 200:
-            raise commands.CommandInvokeError(f"Something went wrong - returned {status}")
+           return await message.reply(f"Something went wrong - returned {status}")
 
         await message.reply(rjson["results"][0]["text"])
 
