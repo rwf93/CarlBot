@@ -1,5 +1,5 @@
 import requests
-from utils.common_async import async_post
+from utils.casync import async_post
 
 def txt2img(endpoint, payload):
     return requests.post(url=f"{endpoint}/sdapi/v1/txt2img", json=payload)
