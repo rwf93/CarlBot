@@ -86,16 +86,16 @@ class AI(commands.Cog):
     @option("seed",             default=-1)
     @option("clip_skip",        default=2, max=4)
     @option("batch_size",       default=1, max=4)
-    async def sd_prompt(self, ctx: discord.ApplicationContext,
-                        prompt: str, negative_prompt:
-                        str, steps: int, cfg_scale:
-                        float, width: int, height: int,
+    async def sd_prompt(self,
+                        ctx: discord.ApplicationContext,
+                        prompt: str, negative_prompt:str,
+                        steps: int, cfg_scale: float,
+                        width: int, height: int,
                         sampler: str,
                         styles: str,
                         seed: int,
                         clip_skip: int,
-                        batch_size: int
-                    ):
+                        batch_size: int):
         await ctx.defer()
 
         payload = {
